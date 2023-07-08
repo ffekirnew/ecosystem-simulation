@@ -1,7 +1,5 @@
 import pygame
 
-from src.components.ecosystem import Ecosystem
-
 
 class FoodState:
     RIPEN = 0
@@ -11,12 +9,17 @@ class FoodState:
 
 
 class Food:
-    size = (20, 20)
+    size = (50, 50)
+    eaten_image = pygame.transform.scale(pygame.image.load('./assets/images/plantation_small.png'), size)
+    seeded_image = pygame.transform.scale(pygame.image.load('./assets/images/plantation_small.png'), size)
+    growing_image = pygame.transform.scale(pygame.image.load('./assets/images/plantation_medium.png'), size)
+    ripen_image = pygame.transform.scale(pygame.image.load('./assets/images/plantation_large.png'), size)
 
-    def __init__(self, pos, screen):
+    def __init__(self, pos, ecosystem, screen):
         self.pos = pos
         self.screen = screen
         self.food = pygame.Rect(self.pos, self.size)
+        self.ecosystem = ecosystem
 
         self.state = FoodState.SEEDED
         self.time = 0
@@ -24,7 +27,12 @@ class Food:
     def update(self):
         self.time += 1
 
-        if self.state == FoodState.SEEDED or self.state == FoodState.EATEN:
+        if self.state == FoodState.RIPEN:
+            if self.time >= 500:
+                self.ecosystem.add_food((self.pos[0] - self.size[0], self.pos[1] - self.size[1]))
+                self.time = 0
+
+        elif self.state == FoodState.SEEDED or self.state == FoodState.EATEN:
             if self.time >= 100:
                 self.state = FoodState.GROWING
                 self.time = 0
@@ -39,15 +47,15 @@ class Food:
 
     def draw(self):
         self.update()
-        color = (0, 255, 0)
+        image = None
 
         if self.state == FoodState.SEEDED:
-            color = (0, 255, 0)
+            image = self.seeded_image
         elif self.state == FoodState.GROWING:
-            color = (0, 255, 0)
+            image = self.growing_image
         elif self.state == FoodState.RIPEN:
-            color = (255, 255, 0)
+            image = self.ripen_image
         elif self.state == FoodState.EATEN:
-            color = (0, 0, 0)
+            image = self.eaten_image
 
-        pygame.draw.rect(self.screen, color, self.food)
+        self.screen.blit(image, self.food)

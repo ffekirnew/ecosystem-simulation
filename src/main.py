@@ -16,29 +16,25 @@ pygame.mixer.init()
 
 def main():
     pygame.init()
-    pygame.display.set_caption('Hello World!')
-    background = pygame.image.load('./assets/images/backgrounds/mud-pattern.jpg')
+    pygame.display.set_caption('Ecosystem Simulation')
+    background = pygame.transform.scale(pygame.image.load('./assets/images/backgrounds/abstract_3.jpg'), (500, 500))
 
     display = (1200, 700)
     screen = pygame.display.set_mode(display, RESIZABLE)
 
     ecosystem = Ecosystem(screen)
 
-    num_foods = 10
+    num_foods = 20
     for _ in range(num_foods):
-        ecosystem.add_food(
-            Food((random.randint(0, screen.get_width()), random.randint(0, screen.get_height())), screen))
+        ecosystem.add_food()
 
-    num_waters = 4
+    num_waters = 2
     for _ in range(num_waters):
-        ecosystem.add_water(
-            Water((random.randint(0, screen.get_width()), random.randint(0, screen.get_height())), screen))
+        ecosystem.add_water()
 
-    num_rabbits = 40
+    num_rabbits = 10
     for _ in range(num_rabbits):
-        random_pos = get_random_position(screen.get_size())
-        rabbit = Rabbit(random_pos, screen, random.randint(0, 1), random.randint(0, 360))
-        ecosystem.add_animal(rabbit)
+        ecosystem.add_animal()
 
     running = True
     clock = pygame.time.Clock()
@@ -48,8 +44,10 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
-        scaled_background = pygame.transform.scale(background, screen.get_size())
-        screen.blit(scaled_background, (0, 0))
+        for y in range(0, screen.get_height(), background.get_height()):
+            for x in range(0, screen.get_width(), background.get_width()):
+                screen.blit(background, (x, y))
+
         ecosystem.draw()
         pygame.display.flip()
 

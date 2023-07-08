@@ -8,30 +8,32 @@ class WaterState:
 
 
 class Water:
-    size = (100, 100)
+    size = (150, 150)
+    water_image = pygame.transform.scale(pygame.image.load('./assets/images/water_pond_2.png'), size)
 
     def __init__(self, pos, screen):
         self.pos = pos
         self.screen = screen
         self.water = pygame.Rect(self.pos, self.size)
 
-        self.state = WaterState.EMPTY
+        self.state = WaterState.FULL
         self.time = 0
 
     def update(self):
         self.time += 1
 
         if self.state == WaterState.EMPTY:
-            if self.time >= 100:
+            if self.time >= 0:
                 self.state = WaterState.FILLING
                 self.time = 0
         elif self.state == WaterState.FILLING:
-            if self.time >= 100:
+            if self.time >= 0:
                 self.state = WaterState.FULL
                 self.time = 0
 
     def change_state(self, state):
         self.state = state
+        self.state = WaterState.FULL
         self.time = 0
 
     def draw(self):
@@ -45,4 +47,4 @@ class Water:
         elif self.state == WaterState.FULL:
             color = (0, 0, 255)
 
-        pygame.draw.rect(self.screen, color, self.water)
+        self.screen.blit(self.water_image, self.water)

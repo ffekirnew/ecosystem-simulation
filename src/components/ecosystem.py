@@ -1,4 +1,10 @@
+import random
+
 import pygame
+
+from src.components.food import Food
+from src.components.rabbit import Rabbit
+from src.components.water import Water
 
 
 class Ecosystem:
@@ -8,13 +14,28 @@ class Ecosystem:
         self.waters = []
         self.animals = []
 
-    def add_food(self, food):
+    def add_food(self, pos=None):
+        if not pos:
+            pos = (random.randint(0, self.screen.get_width() - Food.size[0]),
+                   random.randint(0, self.screen.get_height() - Food.size[1]))
+        food = Food(pos, self, self.screen)
         self.foods.append(food)
 
-    def add_water(self, water):
+    def add_water(self, pos=None):
+        if not pos:
+            pos = (random.randint(0, self.screen.get_width() - Water.size[0]),
+                   random.randint(0, self.screen.get_height() - Water.size[1]))
+        water = Water(pos, self.screen)
         self.waters.append(water)
 
-    def add_animal(self, animal):
+    def add_animal(self, pos=None, sex=None):
+        if not pos:
+            pos = (random.randint(0, self.screen.get_width() - Rabbit.size[0]),
+                   random.randint(0, self.screen.get_height() - Rabbit.size[1]))
+        if not sex:
+            sex = random.randint(0, 1)
+
+        animal = Rabbit(pos, self.screen, sex, random.randint(0, 360))
         self.animals.append(animal)
 
         animal.animals = self.animals

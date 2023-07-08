@@ -1,12 +1,10 @@
 import random
-from typing import List
 
 import pygame
 import numpy as np
 
 from src.components.animal import Animal
-from src.components.ecosystem import Ecosystem
-from src.components.food import Food, FoodState
+from src.components.food import FoodState
 from src.components.water import WaterState
 
 
@@ -21,7 +19,7 @@ class RabbitState:
 
 class Rabbit(Animal):
     size = (20, 20)
-    treshold = 300
+    threshold = 500
 
     def __init__(self, pos: tuple, screen: pygame.Surface, sex: int, direction: int = 0):
         super().__init__(screen)
@@ -34,8 +32,8 @@ class Rabbit(Animal):
         self.animals = []
 
         self.sex = sex
-        # use colors yellow and pink based on sex
-        self.color = (50, 50, 150) if self.sex else (25, 100, 120)
+        # use colors yellow and pink based on sex, Females are pink, Males are blue
+        self.color = (0, 0, 255) if self.sex else (255, 0, 255)
 
         self.hunger = 0
         self.thirst = 0
@@ -108,17 +106,27 @@ class Rabbit(Animal):
     def handle_idleness(self):
         priority = max([self.hunger, self.thirst, self.reproductive_urge])
         if self.hunger == priority:
-            if self.hunger > self.treshold:
+            if self.hunger > 3 * self.threshold:
+                print('Dead because of hunger')
+                self.alive = False
+            if self.hunger > self.threshold:
                 food_pos = [food.pos for food in self.foods if food.state == FoodState.RIPEN]
                 self.find_nearest_resource(food_pos)
 
         elif self.thirst == priority:
-            if self.thirst > self.treshold:
+            if self.thirst > 3 * self.threshold:
+                print('Dead because of thirst')
+                self.alive = False
+            if self.thirst > self.threshold:
                 water_pos = [water.pos for water in self.waters]
                 self.find_nearest_resource(water_pos)
 
         elif self.reproductive_urge == priority:
-            if self.reproductive_urge > self.treshold and self.sex:
+            if self.reproductive_urge > 5 * self.threshold:
+                print('Dead because of reproductive urge')
+                self.alive = False
+
+            if self.reproductive_urge > self.threshold and self.sex:
                 mates_pos = [mate.pos for mate in self.animals if
                              (mate.state != RabbitState.MATING and mate.sex == 1 - self.sex)]
                 self.find_nearest_resource(mates_pos)
@@ -149,13 +157,11 @@ class Rabbit(Animal):
 
     def handle_collision_with_mate(self):
         for animal in self.animals:
-            print(animal.sex, self.sex, 1 - self.sex)
             if type(animal) == Rabbit and animal.sex == 1 - self.sex:
                 rabbit = animal
 
                 if rabbit.rabbit.colliderect(self.rabbit) and rabbit.state != RabbitState.MATING \
-                        and rabbit.reproductive_urge > 200 and self.reproductive_urge > 200:
-                    print('acting weird')
+                        and rabbit.reproductive_urge > 3 * self.threshold and self.reproductive_urge > self.threshold:
                     self.mate()
                     rabbit.mate()
 
