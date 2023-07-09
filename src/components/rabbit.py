@@ -3,18 +3,9 @@ import random
 import pygame
 import numpy as np
 
-from src.components.animal import Animal
+from src.components.animal import Animal, AnimalState
 from src.components.food import FoodState
 from src.components.water import WaterState
-
-
-class RabbitState:
-    SLEEPING = 0
-    EATING = 1
-    DRINKING = 2
-    MATING = 3
-    IDLE = 4
-    JUMPING = 5
 
 
 class Rabbit(Animal):
@@ -41,9 +32,9 @@ class Rabbit(Animal):
         self.happiness = 0
         self.reproductive_urge = 0
         self.age = 0
-        self.alive = True
+        self.alive = AnimalState.ALIVE
 
-        self.state = RabbitState.IDLE
+        self.state = AnimalState.IDLE
         self.direction = direction
         self.jump_distance = 2
         self.time = 0
@@ -86,19 +77,19 @@ class Rabbit(Animal):
         self.time += 1
         self.update()
 
-        if self.state == RabbitState.IDLE:
+        if self.state == AnimalState.IDLE:
             self.handle_collision_with_food()
             self.handle_collision_with_water()
             self.handle_collision_with_mate()
             self.handle_idleness()
 
-        elif self.state == RabbitState.EATING:
+        elif self.state == AnimalState.EATING:
             self.handle_eating()
-        elif self.state == RabbitState.DRINKING:
+        elif self.state == AnimalState.DRINKING:
             self.handle_drinking()
-        elif self.state == RabbitState.MATING:
+        elif self.state == AnimalState.MATING:
             self.handle_mating()
-        elif self.state == RabbitState.SLEEPING:
+        elif self.state == AnimalState.SLEEPING:
             self.handle_sleeping()
 
         self.move()
@@ -108,7 +99,7 @@ class Rabbit(Animal):
         if self.hunger == priority:
             if self.hunger > 3 * self.threshold:
                 print('Dead because of hunger')
-                self.alive = False
+                self.alive = AnimalState.DEAD
             if self.hunger > self.threshold:
                 food_pos = [food.pos for food in self.foods if food.state == FoodState.RIPEN]
                 self.find_nearest_resource(food_pos)
@@ -116,7 +107,7 @@ class Rabbit(Animal):
         elif self.thirst == priority:
             if self.thirst > 3 * self.threshold:
                 print('Dead because of thirst')
-                self.alive = False
+                self.alive = AnimalState.DEAD
             if self.thirst > self.threshold:
                 water_pos = [water.pos for water in self.waters]
                 self.find_nearest_resource(water_pos)
@@ -124,50 +115,50 @@ class Rabbit(Animal):
         elif self.reproductive_urge == priority:
             if self.reproductive_urge > 5 * self.threshold:
                 print('Dead because of reproductive urge')
-                self.alive = False
+                self.alive = AnimalState.DEAD
 
             if self.reproductive_urge > self.threshold and self.sex:
                 mates_pos = [mate.pos for mate in self.animals if
-                             (mate.state != RabbitState.MATING and mate.sex == 1 - self.sex)]
+                             (mate.state != AnimalState.MATING and mate.sex == 1 - self.sex)]
                 self.find_nearest_resource(mates_pos)
 
     def handle_eating(self):
         if self.time > 50:
             self.jump_distance = 2
-            self.state = RabbitState.IDLE
+            self.state = AnimalState.IDLE
 
     def handle_drinking(self):
         if self.time > 50:
             self.jump_distance = 2
-            self.state = RabbitState.IDLE
+            self.state = AnimalState.IDLE
 
     def handle_mating(self):
         if self.time > 50:
             self.jump_distance = 2
-            self.state = RabbitState.IDLE
+            self.state = AnimalState.IDLE
 
     def handle_sleeping(self):
         pass
 
     def handle_collision_with_food(self):
         for food in self.foods:
-            if food.state == FoodState.RIPEN and self.rabbit.colliderect(food.food):
+            if self.hunger > self.threshold and food.state == FoodState.RIPEN and self.rabbit.colliderect(food.food):
                 self.eat()
                 food.change_state(FoodState.EATEN)
 
     def handle_collision_with_mate(self):
         for animal in self.animals:
-            if type(animal) == Rabbit and animal.sex == 1 - self.sex:
+            if self.reproductive_urge > self.threshold and type(animal) == Rabbit and animal.sex == 1 - self.sex:
                 rabbit = animal
 
-                if rabbit.rabbit.colliderect(self.rabbit) and rabbit.state != RabbitState.MATING \
+                if rabbit.rabbit.colliderect(self.rabbit) and rabbit.state != AnimalState.MATING \
                         and rabbit.reproductive_urge > 3 * self.threshold and self.reproductive_urge > self.threshold:
                     self.mate()
                     rabbit.mate()
 
     def handle_collision_with_water(self):
         for water in self.waters:
-            if water.state == WaterState.FULL and self.rabbit.colliderect(water.water):
+            if self.thirst > self.threshold and water.state == WaterState.FULL and self.rabbit.colliderect(water.water):
                 self.drink()
                 water.change_state(WaterState.EMPTY)
 
@@ -177,32 +168,32 @@ class Rabbit(Animal):
 
     def eat(self):
         self.jump_distance = 0
-        self.state = RabbitState.EATING
+        self.state = AnimalState.EATING
         self.hunger = 0
         self.time = 0
 
     def drink(self):
         self.jump_distance = 0
-        self.state = RabbitState.DRINKING
+        self.state = AnimalState.DRINKING
         self.thirst = 0
         self.time = 0
 
     def mate(self):
         self.jump_distance = 0
-        self.state = RabbitState.MATING
+        self.state = AnimalState.MATING
         self.reproductive_urge = 0
         self.time = 0
 
     def die(self):
-        self.state = RabbitState.IDLE
-        self.alive = False
+        self.state = AnimalState.IDLE
+        self.alive = AnimalState.DEAD
 
     def sleep(self):
-        self.state = RabbitState.SLEEPING
+        self.state = AnimalState.SLEEPING
         self.tiredness = 0
 
     def jump(self):
-        self.state = RabbitState.JUMPING
+        self.state = AnimalState.JUMPING
         self.happiness = 0
 
     def draw(self):

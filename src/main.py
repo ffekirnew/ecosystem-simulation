@@ -19,7 +19,7 @@ def main():
     pygame.display.set_caption('Ecosystem Simulation')
     background = pygame.transform.scale(pygame.image.load('./assets/images/backgrounds/abstract_3.jpg'), (500, 500))
 
-    display = (1200, 700)
+    display = (1000, 700)
     screen = pygame.display.set_mode(display, RESIZABLE)
 
     ecosystem = Ecosystem(screen)

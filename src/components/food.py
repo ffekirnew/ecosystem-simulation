@@ -1,3 +1,5 @@
+import math
+
 import pygame
 
 
@@ -21,6 +23,10 @@ class Food:
         self.food = pygame.Rect(self.pos, self.size)
         self.ecosystem = ecosystem
 
+        self.children = 0
+        self.max_children = 4
+        self.degree = 360 // self.max_children
+
         self.state = FoodState.SEEDED
         self.time = 0
 
@@ -28,9 +34,18 @@ class Food:
         self.time += 1
 
         if self.state == FoodState.RIPEN:
-            if self.time >= 500:
-                self.ecosystem.add_food((self.pos[0] - self.size[0], self.pos[1] - self.size[1]))
+            if self.time >= 500 and self.children < self.max_children:
+                # distribute the 10 children in circle from the original food
+                center = (self.pos[0] + self.size[0] // 2, self.pos[1] + self.size[1] // 2,)
+                # calculate the position of the child
+
+                child_degree = self.children * self.degree
+                child_x = center[0] + 100 * math.cos(math.radians(child_degree))
+                child_y = center[1] + 100 * math.sin(math.radians(child_degree))
+
+                self.ecosystem.add_food((child_x, child_y))
                 self.time = 0
+                self.children += 1
 
         elif self.state == FoodState.SEEDED or self.state == FoodState.EATEN:
             if self.time >= 100:

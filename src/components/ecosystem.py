@@ -2,6 +2,7 @@ import random
 
 import pygame
 
+from src.components.animal import AnimalState
 from src.components.food import Food
 from src.components.rabbit import Rabbit
 from src.components.water import Water
@@ -50,5 +51,6 @@ class Ecosystem:
             water.draw()
 
         for animal in self.animals:
-            animal.control()
-            animal.draw()
+            if animal.alive == AnimalState.ALIVE:
+                animal.control()
+                animal.draw()
